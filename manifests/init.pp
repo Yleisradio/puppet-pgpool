@@ -1,6 +1,6 @@
-# = Class: postgresql
+# = Class: pgpool
 #
-# This is the main postgresql class
+# This is the main pgpool class
 #
 #
 # == Parameters
@@ -18,11 +18,11 @@
 # [*source_hba*]
 #   Sets the content of source parameter for the hba configuration file
 #   Note that single lines of hba file can be managed also (and alternatively)
-#   by postgresql::hba
+#   by pgpool::hba
 #
 # [*template_hba*]
 #   Sets the path to the template to use as content for hba configuration file
-#   If defined, postgresql hba config file has: content => content("$template_hba")
+#   If defined, pgpool hba config file has: content => content("$template_hba")
 #   Note source_hba and template_hba parameters are mutually exclusive: don't use both
 #
 # [*template_hba_header*]
@@ -322,7 +322,7 @@ class pgpool (
   }
 
   $manage_service_autorestart = $pgpool::bool_service_autorestart ? {
-    true    => Service[postgresql],
+    true    => Service[pgpool],
     false   => undef,
   }
 
@@ -443,9 +443,8 @@ class pgpool (
 
   $real_log_file = $pgpool::log_file ? {
     ''        => $::operatingsystem ? {
-      /(?i:Debian|Ubuntu|Mint)/       => "${real_log_dir}/postgresql-${real_version}-main.log",
       /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II-${postgresql_version_short}.log",
-      default                         => "/var/log/pgpool/pgpool.log",
+      default                         => "/var/log/pgpool.log",
     },
     default   => $pgpool::log_file,
   }
@@ -453,30 +452,30 @@ class pgpool (
   ### Managed resources
 
   if $pgpool::bool_install_prerequisites {
-    require postgresql::prerequisites
+    require pgpool::prerequisites
   }
 
-  package { 'postgresql':
+  package { 'pgpool':
     ensure => $pgpool::manage_package,
     name   => $pgpool::real_package,
   }
 
-  service { 'postgresql':
+  service { 'pgpool':
     ensure     => $pgpool::manage_service_ensure,
     name       => $pgpool::real_service,
     enable     => $pgpool::manage_service_enable,
     hasstatus  => $pgpool::service_status,
     pattern    => $pgpool::process,
-    require    => Package['postgresql'],
+    require    => Package['pgpool'],
   }
 
-  file { 'postgresql.conf':
+  file { 'pgpool.conf':
     ensure  => $pgpool::manage_file,
     path    => $pgpool::real_config_file,
     mode    => $pgpool::config_file_mode,
     owner   => $pgpool::config_file_owner,
     group   => $pgpool::config_file_group,
-    require => Package['postgresql'],
+    require => Package['pgpool'],
     notify  => $pgpool::manage_service_autorestart,
     source  => $pgpool::manage_file_source,
     content => $pgpool::manage_file_content,
@@ -485,13 +484,13 @@ class pgpool (
   }
 
   if $pgpool::source_hba or $pgpool::template_hba {
-    file { 'postgresql_hba.conf':
+    file { 'pgpool_hba.conf':
       ensure  => $pgpool::manage_file,
       path    => $pgpool::real_config_file_hba,
       mode    => $pgpool::config_file_mode,
       owner   => $pgpool::config_file_owner,
       group   => $pgpool::config_file_group,
-      require => Package['postgresql'],
+      require => Package['pgpool'],
       notify  => $pgpool::manage_service_autorestart,
       source  => $pgpool::manage_file_source_hba,
       content => $pgpool::manage_file_content_hba,
@@ -501,12 +500,12 @@ class pgpool (
   }
 
 
-  # The whole postgresql configuration directory can be recursively overriden
+  # The whole pgpool configuration directory can be recursively overriden
   if $pgpool::source_dir {
-    file { 'postgresql.dir':
+    file { 'pgpool.dir':
       ensure  => directory,
       path    => $pgpool::real_config_dir,
-      require => Package['postgresql'],
+      require => Package['pgpool'],
       notify  => $pgpool::manage_service_autorestart,
       source  => $pgpool::source_dir,
       recurse => true,
@@ -526,7 +525,7 @@ class pgpool (
   ### Provide puppi data, if enabled ( puppi => true )
   if $pgpool::bool_puppi == true {
     $classvars=get_class_args()
-    puppi::ze { 'postgresql':
+    puppi::ze { 'pgpool':
       ensure    => $pgpool::manage_file,
       variables => $classvars,
       helper    => $pgpool::puppi_helper,
@@ -536,14 +535,14 @@ class pgpool (
 
   ### Service monitoring, if enabled ( monitor => true )
   if $pgpool::bool_monitor == true {
-    monitor::port { "postgresql_${postgresql::protocol}_${postgresql::port}":
+    monitor::port { "pgpool_${pgpool::protocol}_${pgpool::port}":
       protocol => $pgpool::protocol,
       port     => $pgpool::port,
       target   => $pgpool::monitor_target,
       tool     => $pgpool::monitor_tool,
       enable   => $pgpool::manage_monitor,
     }
-    monitor::process { 'postgresql_process':
+    monitor::process { 'pgpool_process':
       process  => $pgpool::process,
       service  => $pgpool::real_service,
       pidfile  => $pgpool::real_pid_file,
