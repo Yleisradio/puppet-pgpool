@@ -250,6 +250,7 @@ class pgpool (
   $template_hba          = params_lookup( 'template_hba' ),
   $template_hba_header   = params_lookup( 'template_hba_header' ),
   $template_hba_footer   = params_lookup( 'template_hba_footer' ),
+  $template_pcp          = params_lookup( 'template_pcp' ),
   $config_file_pcp       = params_lookup( 'config_file_pcp' ),
   $source_pcp            = params_lookup( 'source_pcp' ),
   $my_class              = params_lookup( 'my_class' ),
