@@ -59,7 +59,7 @@ class pgpool::params {
   $config_file = ''
 
   $config_file_mode = $::operatingsystem ? {
-    default => '0600',
+    default => '0644',
   }
 
   $config_file_owner = $::operatingsystem ? {
