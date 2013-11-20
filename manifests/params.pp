@@ -22,8 +22,6 @@ class pgpool::params {
   $osver=$ossplit[0]
 
   ### Module's specific parameters
-  $config_file_pcp = ''
-  $source_pcp = ''
 
   $config_file_hba = ''
 
