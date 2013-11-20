@@ -245,8 +245,6 @@
 #
 class pgpool (
   $install_prerequisites = params_lookup( 'install_prerequisites' ),
-  $config_file_pcp       = params_lookup( 'config_file_pcp' ),
-  $source_pcp            = params_lookup( 'source_pcp' ),
   $config_file_hba       = params_lookup( 'config_file_hba' ),
   $source_hba            = params_lookup( 'source_hba' ),
   $template_hba          = params_lookup( 'template_hba' ),
