@@ -31,6 +31,17 @@
 # [*template_hba_footer*]
 #   Path to the footer's template when using concat
 #
+# [*config_file_pcp*]
+#    Location of the pcp file
+#
+# [*source_pcp*]
+#   Sets the content of source parameter for the pcp configuration file
+#
+# [*template_pcp*]
+#   Sets the path to the template to use as content for pcp configuration file
+#   If defined, pgpool pcp config file has: content => content("$template_pcp")
+#   Note source_pcp and template_pcp parameters are mutually exclusive: don't use both
+#
 # Standard class parameters
 # Define the general class behaviour and customizations
 #
@@ -241,6 +252,8 @@ class pgpool (
   $template_hba          = params_lookup( 'template_hba' ),
   $template_hba_header   = params_lookup( 'template_hba_header' ),
   $template_hba_footer   = params_lookup( 'template_hba_footer' ),
+  $config_file_pcp       = params_lookup( 'config_file_pcp' ),
+  $source_pcp            = params_lookup( 'source_pcp' ),
   $my_class              = params_lookup( 'my_class' ),
   $source                = params_lookup( 'source' ),
   $source_dir            = params_lookup( 'source_dir' ),
@@ -376,6 +389,16 @@ class pgpool (
     default   => template($pgpool::template_hba),
   }
 
+  $manage_file_source_pcp = $pgpool::source_pcp ? {
+    ''        => undef,
+    default   => $pgpool::source_pcp,
+  }
+
+  $manage_file_content_pcp = $pgpool::template_pcp ? {
+    ''        => undef,
+    default   => template($pgpool::template_pcp),
+  }
+
 ### Calculation of internal variables according to user input
   $real_version = $pgpool::version ? {
     ''      => $pgpool::bool_use_postgresql_repo ? {
@@ -499,6 +522,21 @@ class pgpool (
     }
   }
 
+  if $pgpool::source_pcp or $pgpool::template_pcp {
+    file { 'pcp.conf':
+      ensure  => $pgpool::manage_file,
+      path    => $pgpool::real_config_file_pcp,
+      mode    => $pgpool::config_file_mode,
+      owner   => $pgpool::config_file_owner,
+      group   => $pgpool::config_file_group,
+      require => Package['pgpool'],
+      notify  => $pgpool::manage_service_autorestart,
+      source  => $pgpool::manage_file_source_pcp,
+      content => $pgpool::manage_file_content_pcp,
+      replace => $pgpool::manage_file_replace,
+      audit   => $pgpool::manage_audit,
+    }
+  }
 
   # The whole pgpool configuration directory can be recursively overriden
   if $pgpool::source_dir {

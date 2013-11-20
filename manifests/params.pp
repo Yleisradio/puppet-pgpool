@@ -32,6 +32,10 @@ class pgpool::params {
   $template_hba_header = 'pgpool/concat_hba_header.erb'
   $template_hba_footer = 'pgpool/concat_hba_footer.erb'
 
+  $config_file_pcp = ''
+  $source_pcp = ''
+  $template_pcp = ''
+
   ### Application related parameters
 
   $package = ''
