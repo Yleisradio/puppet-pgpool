@@ -33,10 +33,10 @@ describe 'pgpool' do
   describe 'Test decommissioning - absent' do
     let(:params) { {:absent => true, :monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp'} }
 
-    it 'should remove Package[pgpool]' do should contain_package('postgresql').with_ensure('absent') end 
-    it 'should stop Service[pgpool]' do should contain_service('postgresql').with_ensure('stopped') end
-    it 'should not enable at boot Service[pgpool]' do should contain_service('postgresql').with_enable('false') end
-    it 'should remove pgpool configuration file' do should contain_file('postgresql.conf').with_ensure('absent') end
+    it 'should remove Package[pgpool]' do should contain_package('pgpool').with_ensure('absent') end 
+    it 'should stop Service[pgpool]' do should contain_service('pgpool').with_ensure('stopped') end
+    it 'should not enable at boot Service[pgpool]' do should contain_service('pgpool').with_enable('false') end
+    it 'should remove pgpool configuration file' do should contain_file('pgpool.conf').with_ensure('absent') end
     it 'should not monitor the process' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
       content.should == false
@@ -51,8 +51,8 @@ describe 'pgpool' do
     let(:params) { {:disable => true, :monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp'} }
 
     it { should contain_package('pgpool').with_ensure('present') }
-    it 'should stop Service[pgpool]' do should contain_service('postgresql').with_ensure('stopped') end
-    it 'should not enable at boot Service[pgpool]' do should contain_service('postgresql').with_enable('false') end
+    it 'should stop Service[pgpool]' do should contain_service('pgpool').with_ensure('stopped') end
+    it 'should not enable at boot Service[pgpool]' do should contain_service('pgpool').with_enable('false') end
     it { should contain_file('pgpool.conf').with_ensure('present') }
     it 'should not monitor the process' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
@@ -70,7 +70,7 @@ describe 'pgpool' do
     it { should contain_package('pgpool').with_ensure('present') }
     it { should_not contain_service('pgpool').with_ensure('present') }
     it { should_not contain_service('pgpool').with_ensure('absent') }
-    it 'should not enable at boot Service[pgpool]' do should contain_service('postgresql').with_enable('false') end
+    it 'should not enable at boot Service[pgpool]' do should contain_service('pgpool').with_enable('false') end
     it { should contain_file('pgpool.conf').with_ensure('present') }
     it 'should not monitor the process locally' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
@@ -97,7 +97,7 @@ describe 'pgpool' do
   end
 
   describe 'Test customizations - source' do
-    let(:params) { {:source => "puppet://modules/pgpool/spec" , :source_dir => "puppet://modules/postgresql/dir/spec" , :source_dir_purge => true } }
+    let(:params) { {:source => "puppet://modules/pgpool/spec" , :source_dir => "puppet://modules/pgpool/dir/spec" , :source_dir_purge => true } }
 
     it 'should request a valid source ' do
       content = catalogue.resource('file', 'pgpool.conf').send(:parameters)[:source]
@@ -122,7 +122,7 @@ describe 'pgpool' do
   end
 
   describe 'Test service autorestart' do
-    it { should contain_file('pgpool.conf').with_notify('Service[postgresql]') }
+    it { should contain_file('pgpool.conf').with_notify('Service[pgpool]') }
   end
 
   describe 'Test service autorestart' do
