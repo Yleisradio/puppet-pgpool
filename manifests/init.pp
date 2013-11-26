@@ -439,7 +439,7 @@ class pgpool (
   $real_package = $pgpool::package ? {
     ''          => $::operatingsystem ? {
       /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
-      default                         => "pgpool",
+      default                         => "pgpool2",
     },
     default     => $pgpool::package,
   }
