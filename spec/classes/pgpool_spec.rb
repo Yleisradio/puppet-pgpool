@@ -14,7 +14,7 @@ describe 'pgpool' do
   end
 
   describe 'Test standard installation with monitoring and firewalling' do
-    let(:params) { {:monitor => true , :firewall => true, :port => '42', :protocol => 'tcp' } }
+    let(:params) { {:monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp' } }
 
     it { should contain_package('pgpool').with_ensure('present') }
     it { should contain_service('pgpool').with_ensure('running') }
@@ -25,13 +25,13 @@ describe 'pgpool' do
       content.should == true
     end
     it 'should place a firewall rule' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:enable]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:enable]
       content.should == true
     end
   end
 
   describe 'Test decommissioning - absent' do
-    let(:params) { {:absent => true, :monitor => true , :firewall => true, :port => '42', :protocol => 'tcp'} }
+    let(:params) { {:absent => true, :monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp'} }
 
     it 'should remove Package[pgpool]' do should contain_package('postgresql').with_ensure('absent') end 
     it 'should stop Service[pgpool]' do should contain_service('postgresql').with_ensure('stopped') end
@@ -42,13 +42,13 @@ describe 'pgpool' do
       content.should == false
     end
     it 'should remove a firewall rule' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:enable]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:enable]
       content.should == false
     end
   end
 
   describe 'Test decommissioning - disable' do
-    let(:params) { {:disable => true, :monitor => true , :firewall => true, :port => '42', :protocol => 'tcp'} }
+    let(:params) { {:disable => true, :monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp'} }
 
     it { should contain_package('pgpool').with_ensure('present') }
     it 'should stop Service[pgpool]' do should contain_service('postgresql').with_ensure('stopped') end
@@ -59,13 +59,13 @@ describe 'pgpool' do
       content.should == false
     end
     it 'should remove a firewall rule' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:enable]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:enable]
       content.should == false
     end
   end
 
   describe 'Test decommissioning - disableboot' do
-    let(:params) { {:disableboot => true, :monitor => true , :firewall => true, :port => '42', :protocol => 'tcp'} }
+    let(:params) { {:disableboot => true, :monitor => true , :firewall => true, :port => '5432', :protocol => 'tcp'} }
   
     it { should contain_package('pgpool').with_ensure('present') }
     it { should_not contain_service('pgpool').with_ensure('present') }
@@ -77,7 +77,7 @@ describe 'pgpool' do
       content.should == false
     end
     it 'should keep a firewall rule' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:enable]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:enable]
       content.should == true
     end
   end 
@@ -154,24 +154,24 @@ describe 'pgpool' do
 
   describe 'Test Firewall Tools Integration' do
     let(:facts) { { :ipaddress => '10.42.42.42', :concat_basedir => '/var/lib/puppet/concat'} }
-    let(:params) { {:firewall => true, :firewall_tool => "iptables" , :protocol => "tcp" , :port => "42" } }
+    let(:params) { {:firewall => true, :firewall_tool => "iptables" , :protocol => "tcp" , :port => "5432" } }
 
     it 'should generate correct firewall define' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:tool]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:tool]
       content.should == "iptables"
     end
   end
 
   describe 'Test OldGen Module Set Integration' do
     let(:facts) { { :ipaddress => '10.42.42.42', :concat_basedir => '/var/lib/puppet/concat'} }
-    let(:params) { {:monitor => "yes" , :monitor_tool => "puppi" , :firewall => "yes" , :firewall_tool => "iptables" , :puppi => "yes" , :port => "42" , :protocol => 'tcp' } }
+    let(:params) { {:monitor => "yes" , :monitor_tool => "puppi" , :firewall => "yes" , :firewall_tool => "iptables" , :puppi => "yes" , :port => "5432" , :protocol => 'tcp' } }
 
     it 'should generate monitor resources' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:tool]
       content.should == "puppi"
     end
     it 'should generate firewall resources' do
-      content = catalogue.resource('firewall', 'pgpool_tcp_42').send(:parameters)[:tool]
+      content = catalogue.resource('firewall', 'pgpool_tcp_5432').send(:parameters)[:tool]
       content.should == "iptables"
     end
     it 'should generate puppi resources ' do 
@@ -182,7 +182,7 @@ describe 'pgpool' do
 
   describe 'Test params lookup' do
     let(:facts) { { :monitor => true , :ipaddress => '10.42.42.42' } }
-    let(:params) { { :port => '42' } }
+    let(:params) { { :port => '5432' } }
 
     it 'should honour top scope global vars' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
@@ -192,7 +192,7 @@ describe 'pgpool' do
 
   describe 'Test params lookup' do
     let(:facts) { { :pgpool_monitor => true , :ipaddress => '10.42.42.42' } }
-    let(:params) { { :port => '42' } }
+    let(:params) { { :port => '5432' } }
 
     it 'should honour module specific vars' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
@@ -202,7 +202,7 @@ describe 'pgpool' do
 
   describe 'Test params lookup' do
     let(:facts) { { :monitor => false , :pgpool_monitor => true , :ipaddress => '10.42.42.42' } }
-    let(:params) { { :port => '42' } }
+    let(:params) { { :port => '5432' } }
 
     it 'should honour top scope module specific over global vars' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
@@ -212,7 +212,7 @@ describe 'pgpool' do
 
   describe 'Test params lookup' do
     let(:facts) { { :monitor => false , :ipaddress => '10.42.42.42' } }
-    let(:params) { { :monitor => true , :firewall => true, :port => '42' } }
+    let(:params) { { :monitor => true , :firewall => true, :port => '5432' } }
 
     it 'should honour passed params over global vars' do
       content = catalogue.resource('monitor::process', 'pgpool_process').send(:parameters)[:enable]
