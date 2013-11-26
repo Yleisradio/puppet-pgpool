@@ -34,6 +34,10 @@ class pgpool::params {
   $source_pcp = ''
   $template_pcp = ''
 
+  $config_file_passwd = ''
+  $source_passwd = ''
+  $template_passwd = ''
+
   ### Application related parameters
 
   $package = ''

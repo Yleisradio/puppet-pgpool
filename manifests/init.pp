@@ -42,6 +42,17 @@
 #   If defined, pgpool pcp config file has: content => content("$template_pcp")
 #   Note source_pcp and template_pcp parameters are mutually exclusive: don't use both
 #
+# [*config_file_passwd*]
+#    Location of the pool_passwd file
+#
+# [*source_passwd*]
+#   Sets the content of source parameter for the pool_passwd configuration file
+#
+# [*template_passwd*]
+#   Sets the path to the template to use as content for pool_passwd configuration file
+#   If defined, pgpool pool_passwd config file has: content => content("$template_passwd")
+#   Note source_passwd and template_passwd parameters are mutually exclusive: don't use both
+#
 # Standard class parameters
 # Define the general class behaviour and customizations
 #
@@ -253,6 +264,9 @@ class pgpool (
   $template_pcp          = params_lookup( 'template_pcp' ),
   $config_file_pcp       = params_lookup( 'config_file_pcp' ),
   $source_pcp            = params_lookup( 'source_pcp' ),
+  $template_passwd       = params_lookup( 'template_passwd' ),
+  $config_file_passwd    = params_lookup( 'config_file_passwd' ),
+  $source_passwd         = params_lookup( 'source_passwd' ),
   $my_class              = params_lookup( 'my_class' ),
   $source                = params_lookup( 'source' ),
   $source_dir            = params_lookup( 'source_dir' ),
@@ -398,6 +412,16 @@ class pgpool (
     default   => template($pgpool::template_pcp),
   }
 
+  $manage_file_source_passwd = $pgpool::source_passwd ? {
+    ''        => undef,
+    default   => $pgpool::source_passwd,
+  }
+
+  $manage_file_content_passwd = $pgpool::template_passwd ? {
+    ''        => undef,
+    default   => template($pgpool::template_passwd),
+  }
+
 ### Calculation of internal variables according to user input
   $real_version = $pgpool::version ? {
     ''      => $pgpool::bool_use_postgresql_repo ? {
@@ -440,11 +464,25 @@ class pgpool (
     default     => $pgpool::config_dir,
   }
 
-  $real_config_file = "${real_config_dir}/pgpool.conf"
+  $real_config_file = $pgpool::config_file ? {
+    ''      => "${real_config_dir}/pgpool.conf",
+    default => $pgpool::config_file,
+  }
 
-  $real_config_file_hba = "${real_config_dir}/pool_hba.conf"
+  $real_config_file_hba = $pgpool::config_file_hba ? {
+    ''      => "${real_config_dir}/pool_hba.conf",
+    default => $pgpool::config_file_hba,
+  }
 
-  $real_config_file_pcp = "${real_config_dir}/pcp.conf"
+  $real_config_file_pcp = $pgpool::config_file_pcp ? {
+    ''      => "${real_config_dir}/pcp.conf",
+    default => $pgpool::config_file_pcp,
+  }
+
+  $real_config_file_passwd = $pgpool::config_file_passwd ? {
+    ''      => "${real_config_dir}/pool_passwd",
+    default => $pgpool::config_file_passwd,
+  }
 
   $real_pid_file = $pgpool::pid_file ? {
     ''          => $::operatingsystem ? {
@@ -532,6 +570,22 @@ class pgpool (
       notify  => $pgpool::manage_service_autorestart,
       source  => $pgpool::manage_file_source_pcp,
       content => $pgpool::manage_file_content_pcp,
+      replace => $pgpool::manage_file_replace,
+      audit   => $pgpool::manage_audit,
+    }
+  }
+
+  if $pgpool::source_passwd or $pgpool::template_passwd {
+    file { 'pool_passwd':
+      ensure  => $pgpool::manage_file,
+      path    => $pgpool::real_config_file_passwd,
+      mode    => $pgpool::config_file_mode,
+      owner   => $pgpool::config_file_owner,
+      group   => $pgpool::config_file_group,
+      require => Package['pgpool'],
+      notify  => $pgpool::manage_service_autorestart,
+      source  => $pgpool::manage_file_source_passwd,
+      content => $pgpool::manage_file_content_passwd,
       replace => $pgpool::manage_file_replace,
       audit   => $pgpool::manage_audit,
     }
