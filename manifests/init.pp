@@ -309,18 +309,18 @@ class pgpool (
   $protocol              = params_lookup( 'protocol' )
   ) inherits pgpool::params {
 
-  $bool_use_postgresql_repo=any2bool($postgresql::use_postgresql_repo)
+  $bool_use_postgresql_repo = any2bool($postgresql::use_postgresql_repo)
   $bool_install_prerequisites = any2bool($install_prerequisites)
-  $bool_source_dir_purge=any2bool($source_dir_purge)
-  $bool_service_autorestart=any2bool($service_autorestart)
-  $bool_absent=any2bool($absent)
-  $bool_disable=any2bool($disable)
-  $bool_disableboot=any2bool($disableboot)
-  $bool_monitor=any2bool($monitor)
-  $bool_puppi=any2bool($puppi)
-  $bool_firewall=any2bool($firewall)
-  $bool_debug=any2bool($debug)
-  $bool_audit_only=any2bool($audit_only)
+  $bool_source_dir_purge = any2bool($source_dir_purge)
+  $bool_service_autorestart = any2bool($service_autorestart)
+  $bool_absent = any2bool($absent)
+  $bool_disable = any2bool($disable)
+  $bool_disableboot = any2bool($disableboot)
+  $bool_monitor = any2bool($monitor)
+  $bool_puppi = any2bool($puppi)
+  $bool_firewall = any2bool($firewall)
+  $bool_debug = any2bool($debug)
+  $bool_audit_only = any2bool($audit_only)
 
   ### Definition of some variables used in the module
   $manage_package = $pgpool::bool_absent ? {
@@ -544,7 +544,7 @@ class pgpool (
   }
 
   if $pgpool::source_hba or $pgpool::template_hba {
-    file { 'pgpool_hba.conf':
+    file { 'pool_hba.conf':
       ensure  => $pgpool::manage_file,
       path    => $pgpool::real_config_file_hba,
       mode    => $pgpool::config_file_mode,
@@ -647,7 +647,7 @@ class pgpool (
 
   ### Firewall management, if enabled ( firewall => true )
   if $pgpool::bool_firewall == true {
-    firewall { "pgpool_${pgpool_protocol}_${pgpool::port}":
+    firewall { "pgpool_${pgpool::protocol}_${pgpool::port}":
       source      => $pgpool::firewall_src,
       destination => $pgpool::firewall_dst,
       protocol    => $pgpool::protocol,
