@@ -98,8 +98,6 @@
 #   Default: present. Can be 'latest' or a specific version number.
 #   Note that if the argument absent (see below) is set to true, the
 #   package is removed, whatever the value of version parameter.
-#   Please check [*use_postgresql_repo*] to see the expected behaviour when
-#   both set.
 #
 # [*absent*]
 #   Set to 'true' to remove package(s) installed by module
@@ -309,7 +307,6 @@ class pgpool (
   $protocol              = params_lookup( 'protocol' )
   ) inherits pgpool::params {
 
-  $bool_use_postgresql_repo = any2bool($postgresql::use_postgresql_repo)
   $bool_install_prerequisites = any2bool($install_prerequisites)
   $bool_source_dir_purge = any2bool($source_dir_purge)
   $bool_service_autorestart = any2bool($service_autorestart)
@@ -424,39 +421,33 @@ class pgpool (
 
 ### Calculation of internal variables according to user input
   $real_version = $pgpool::version ? {
-    ''      => $pgpool::bool_use_postgresql_repo ? {
-      true  => '3.3.1',
-      false => $::osfamily ? {
-        'Debian' => '3.2.4-2',
-        'RedHat' => '3.3.1',
-        default  => '3.3.1',
-      },
+    ''    => $::osfamily ? {
+      'Debian' => '3.2.4-2',
+      'RedHat' => '3.3.1',
+      default  => '3.3.1',
     },
-    default => $pgpool::version,
+  default => $pgpool::version,
   }
-
+  
   $postgresql_version_short = $postgresql::version ? {
-    '' => '92',
+    ''      => '92',
     default => regsubst($postgresql::version,'\.','')
   }
 
   $real_package = $pgpool::package ? {
-    ''          => $::operatingsystem ? {
+    ''      => $::operatingsystem ? {
       /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
       default                         => "pgpool2",
     },
-    default     => $pgpool::package,
+    default => $pgpool::package,
   }
 
   $real_service = $pgpool::service ? {
-    ''          => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => $pgpool::bool_use_postgresql_repo ? {
-        true  => "pgpool-II-${postgresql_version_short}",
-        false => 'pgpool',
-      },
+    ''      => $::operatingsystem ? {
+      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
       default                         => 'pgpool',
     },
-    default     => $pgpool::service,
+    default => $pgpool::service,
   }
 
   $real_config_dir = $pgpool::config_dir ? {
