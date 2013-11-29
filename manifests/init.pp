@@ -434,7 +434,11 @@ class pgpool (
     },
     default => $pgpool::version,
   }
-  $postgresql_version_short = regsubst($postgresql::version,'\.','')
+
+  $postgresql_version_short = $postgresql::version ? {
+    '' => '92',
+    default => regsubst($postgresql::version,'\.','')
+  }
 
   $real_package = $pgpool::package ? {
     ''          => $::operatingsystem ? {
