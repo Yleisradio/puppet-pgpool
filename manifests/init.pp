@@ -319,6 +319,91 @@ class pgpool (
   $bool_debug = any2bool($debug)
   $bool_audit_only = any2bool($audit_only)
 
+  ### Calculation of internal variables according to user input
+  $real_version = $pgpool::version ? {
+    ''    => $::osfamily ? {
+      'Debian' => '3.2.4-2',
+      'RedHat' => '3.3.1',
+      default  => '3.3.1',
+    },
+  default => $pgpool::version,
+  }
+  
+  $postgresql_version_short = $postgresql::version ? {
+    ''      => '92',
+    default => regsubst($postgresql::version,'\.','')
+  }
+
+  $real_package = $pgpool::package ? {
+    ''      => $::operatingsystem ? {
+      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
+      default                         => "pgpool2",
+    },
+    default => $pgpool::package,
+  }
+
+  $real_service = $pgpool::service ? {
+    ''      => $::operatingsystem ? {
+      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
+      default                         => 'pgpool',
+    },
+    default => $pgpool::service,
+  }
+
+  $real_config_dir = $pgpool::config_dir ? {
+    ''          => $::operatingsystem ? {
+      /(?i:Debian|Ubuntu|Mint)/       => "/etc/pgpool2",
+      /(?i:RedHat|Centos|Scientific)/ => "/etc/pgpool-II-${postgresql_version_short}",
+      default                         => '/etc/pgpool',
+    },
+    default     => $pgpool::config_dir,
+  }
+
+  $real_config_file = $pgpool::config_file ? {
+    ''      => "${real_config_dir}/pgpool.conf",
+    default => $pgpool::config_file,
+  }
+
+  $real_config_file_hba = $pgpool::config_file_hba ? {
+    ''      => "${real_config_dir}/pool_hba.conf",
+    default => $pgpool::config_file_hba,
+  }
+
+  $real_config_file_pcp = $pgpool::config_file_pcp ? {
+    ''      => "${real_config_dir}/pcp.conf",
+    default => $pgpool::config_file_pcp,
+  }
+
+  $real_config_file_passwd = $pgpool::config_file_passwd ? {
+    ''      => "${real_config_dir}/pool_passwd",
+    default => $pgpool::config_file_passwd,
+  }
+
+  $real_pid_file = $pgpool::pid_file ? {
+    ''          => $::operatingsystem ? {
+      /(?i:Debian|Ubuntu|Mint)/ => "/var/run/postgresql/pgpool.pid",
+      default                   => "/var/run/pgpool/pgpool.pid",
+    },
+    default     => $pgpool::pid_file,
+  }
+
+  $real_log_dir = $pgpool::log_dir ? {
+    ''        => $::operatingsystem ? {
+      /(?i:Debian|Ubuntu|Mint)/       => '/var/log/postgresql',
+      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II",
+      default                         => "/var/log/pgpool",
+    },
+    default   => $pgpool::log_file,
+  }
+
+  $real_log_file = $pgpool::log_file ? {
+    ''        => $::operatingsystem ? {
+      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II-${postgresql_version_short}.log",
+      default                         => "/var/log/pgpool.log",
+    },
+    default   => $pgpool::log_file,
+  }
+
   ### Definition of some variables used in the module
   $manage_package = $pgpool::bool_absent ? {
     true  => 'absent',
@@ -417,91 +502,6 @@ class pgpool (
   $manage_file_content_passwd = $pgpool::template_passwd ? {
     ''        => undef,
     default   => template($pgpool::template_passwd),
-  }
-
-### Calculation of internal variables according to user input
-  $real_version = $pgpool::version ? {
-    ''    => $::osfamily ? {
-      'Debian' => '3.2.4-2',
-      'RedHat' => '3.3.1',
-      default  => '3.3.1',
-    },
-  default => $pgpool::version,
-  }
-  
-  $postgresql_version_short = $postgresql::version ? {
-    ''      => '92',
-    default => regsubst($postgresql::version,'\.','')
-  }
-
-  $real_package = $pgpool::package ? {
-    ''      => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
-      default                         => "pgpool2",
-    },
-    default => $pgpool::package,
-  }
-
-  $real_service = $pgpool::service ? {
-    ''      => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
-      default                         => 'pgpool',
-    },
-    default => $pgpool::service,
-  }
-
-  $real_config_dir = $pgpool::config_dir ? {
-    ''          => $::operatingsystem ? {
-      /(?i:Debian|Ubuntu|Mint)/       => "/etc/pgpool2",
-      /(?i:RedHat|Centos|Scientific)/ => "/etc/pgpool-II-${postgresql_version_short}",
-      default                         => '/etc/pgpool',
-    },
-    default     => $pgpool::config_dir,
-  }
-
-  $real_config_file = $pgpool::config_file ? {
-    ''      => "${real_config_dir}/pgpool.conf",
-    default => $pgpool::config_file,
-  }
-
-  $real_config_file_hba = $pgpool::config_file_hba ? {
-    ''      => "${real_config_dir}/pool_hba.conf",
-    default => $pgpool::config_file_hba,
-  }
-
-  $real_config_file_pcp = $pgpool::config_file_pcp ? {
-    ''      => "${real_config_dir}/pcp.conf",
-    default => $pgpool::config_file_pcp,
-  }
-
-  $real_config_file_passwd = $pgpool::config_file_passwd ? {
-    ''      => "${real_config_dir}/pool_passwd",
-    default => $pgpool::config_file_passwd,
-  }
-
-  $real_pid_file = $pgpool::pid_file ? {
-    ''          => $::operatingsystem ? {
-      /(?i:Debian|Ubuntu|Mint)/ => "/var/run/postgresql/pgpool.pid",
-      default                   => "/var/run/pgpool/pgpool.pid",
-    },
-    default     => $pgpool::pid_file,
-  }
-
-  $real_log_dir = $pgpool::log_dir ? {
-    ''        => $::operatingsystem ? {
-      /(?i:Debian|Ubuntu|Mint)/       => '/var/log/postgresql',
-      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II",
-      default                         => "/var/log/pgpool",
-    },
-    default   => $pgpool::log_file,
-  }
-
-  $real_log_file = $pgpool::log_file ? {
-    ''        => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II-${postgresql_version_short}.log",
-      default                         => "/var/log/pgpool.log",
-    },
-    default   => $pgpool::log_file,
   }
 
   ### Managed resources
