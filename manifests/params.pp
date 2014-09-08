@@ -78,7 +78,7 @@ class pgpool::params {
 
   $config_file_init = $::operatingsystem ? {
     /(?i:Debian|Ubuntu|Mint)/ => '/etc/default/pgpool2',
-    default                   => '/etc/sysconfig/pgpool-II-92',
+    default                   => '/etc/sysconfig/pgpool',
   }
 
   $pid_file = ''
