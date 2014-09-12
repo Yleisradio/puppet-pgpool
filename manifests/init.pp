@@ -326,7 +326,7 @@ class pgpool (
       'RedHat' => '3.3.1',
       default  => '3.3.1',
     },
-  default => $pgpool::version,
+    default => $pgpool::version,
   }
   
   $postgresql_version_short = $postgresql::version ? {
@@ -343,17 +343,14 @@ class pgpool (
   }
 
   $real_service = $pgpool::service ? {
-    ''      => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => "pgpool-II-${postgresql_version_short}",
-      default                         => 'pgpool',
-    },
+    ''      => 'pgpool',
     default => $pgpool::service,
   }
 
   $real_config_dir = $pgpool::config_dir ? {
     ''          => $::operatingsystem ? {
       /(?i:Debian|Ubuntu|Mint)/       => "/etc/pgpool2",
-      /(?i:RedHat|Centos|Scientific)/ => "/etc/pgpool-II-${postgresql_version_short}",
+      /(?i:RedHat|Centos|Scientific)/ => "/etc/pgpool-II",
       default                         => '/etc/pgpool',
     },
     default     => $pgpool::config_dir,
@@ -390,7 +387,7 @@ class pgpool (
   $real_log_dir = $pgpool::log_dir ? {
     ''        => $::operatingsystem ? {
       /(?i:Debian|Ubuntu|Mint)/       => '/var/log/postgresql',
-      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II",
+      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool",
       default                         => "/var/log/pgpool",
     },
     default   => $pgpool::log_file,
@@ -398,7 +395,7 @@ class pgpool (
 
   $real_log_file = $pgpool::log_file ? {
     ''        => $::operatingsystem ? {
-      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool-II-${postgresql_version_short}.log",
+      /(?i:RedHat|Centos|Scientific)/ => "/var/log/pgpool.log",
       default                         => "/var/log/pgpool.log",
     },
     default   => $pgpool::log_file,
