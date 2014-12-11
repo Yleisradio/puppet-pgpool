@@ -1,0 +1,28 @@
+{
+  "name": "yle-pgpool",
+  "version": "1.0.0",
+  "author": "Andrew N Golovkov",
+  "summary": "This is a Puppet module for pgpool based on the second generation layout (\"NextGen\") of Example42 Puppet Modules.",
+  "license": "ASL 2.0",
+  "source": "https://github.com/Yleisradio/puppet-pgpool.git",
+  "project_page": "https://github.com/Yleisradio/puppet-pgpool",
+  "issues_url": "https://github.com/Yleisradio/puppet-pgpool/issues",
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": [
+        "12.04",
+        "14.04"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "name": "puppet",
+      "version_requirement": "3.x"
+    }
+  ],
+  "dependencies": [
+    {"name":"example42/puppi","version_requirement":"2.x"}
+  ]
+}
